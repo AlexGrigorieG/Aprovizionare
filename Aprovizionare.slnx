@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Aprovizionare.Api/Aprovizionare.Api.csproj" />
+  <Project Path="Aprovizionare.Tests/Aprovizionare.Tests.csproj" />
+</Solution>
