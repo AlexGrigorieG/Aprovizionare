@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Aprovizionare.Api.Data;
 using Aprovizionare.Api.Entities;
 using Aprovizionare.Api.Services;
@@ -6,9 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 
-builder.Services.AddControllers();
+builder.Services.AddExceptionHandler<BusinessRuleExceptionHandler>();
+builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -26,6 +30,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<AuditInterceptor>();
+builder.Services.AddScoped<PurchaseOrderService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -43,6 +48,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

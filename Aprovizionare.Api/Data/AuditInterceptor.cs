@@ -1,5 +1,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Aprovizionare.Api.Entities;
 using Aprovizionare.Api.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace Aprovizionare.Api.Data;
 
 public class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInterceptor
 {
-    private List<(EntityEntry Entry, string Action, string Changes)> _pending = [];
+    private List<(EntityEntry Entry, EntityState State, string? Changes)> _pending = [];
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
@@ -19,7 +20,7 @@ public class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInterceptor
         {
             _pending = eventData.Context.ChangeTracker.Entries()
                 .Where(IsAudited)
-                .Select(e => (e, e.State.ToString(), DescribeChanges(e)))
+                .Select(e => (e, e.State, e.State == EntityState.Added ? null : DescribeChanges(e, e.State)))
                 .ToList();
         }
 
@@ -35,10 +36,10 @@ public class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInterceptor
         var logs = _pending.Select(p => new AuditLog
         {
             UserName = currentUser.UserName,
-            Action = p.Action,
+            Action = p.State.ToString(),
             EntityName = p.Entry.Metadata.ClrType.Name,
             EntityId = KeyOf(p.Entry),
-            Changes = p.Changes,
+            Changes = p.Changes ?? DescribeChanges(p.Entry, EntityState.Added),
             Timestamp = DateTime.UtcNow
         }).ToList();
 
@@ -59,17 +60,18 @@ public class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInterceptor
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        Converters = { new JsonStringEnumConverter() } 
     };
 
-    private static string DescribeChanges(EntityEntry e)
+    private static string DescribeChanges(EntityEntry e, EntityState state)
     {
         var changes = e.Properties
             .Where(p => !p.Metadata.IsPrimaryKey())
-            .Where(p => e.State != EntityState.Modified || p.IsModified)
+            .Where(p => state != EntityState.Modified || p.IsModified)
             .ToDictionary(
                 p => p.Metadata.Name,
-                p => e.State switch
+                p => state switch
                 {
                     EntityState.Added => new { Old = (object?)null, New = p.CurrentValue },
                     EntityState.Deleted => new { Old = p.OriginalValue, New = (object?)null },

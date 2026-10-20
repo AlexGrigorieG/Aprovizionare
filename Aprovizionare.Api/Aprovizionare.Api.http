@@ -1,9 +1,9 @@
 @host = http://localhost:5269
 
-### Fără login: trebuie să dea 401
+### Fără login
 GET {{host}}/api/auth/me
 
-### Login cu parolă greșită: trebuie să dea 401
+### Login cu parolă greșită
 POST {{host}}/api/auth/login
 Content-Type: application/json
 
@@ -20,3 +20,55 @@ GET {{host}}/api/auth/me
 
 ### Logout
 POST {{host}}/api/auth/logout
+
+
+######## COMENZI ########
+
+### 1. Login ca Andrei (Achiziții)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "andrei@firma.ro", "password": "Parola123!" }
+
+### 2. creează o comandă
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{
+  "supplierId": 2,
+  "expectedDeliveryDate": "2026-11-15",
+  "currency": "EUR",
+  "lines": [
+    { "productId": 1, "quantity": 100, "unitPrice": 120 },
+    { "productId": 2, "quantity": 50, "unitPrice": 8 }
+  ]
+}
+
+### 3. Comandă fără linii: trebuie să dea 400 cu mesajul de eroare
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{ "supplierId": 2, "expectedDeliveryDate": "2026-11-15", "currency": "EUR", "lines": [] }
+
+### 4. Andrei vede lista, cu prețuri
+GET {{host}}/api/purchase-orders
+
+### 5. Login ca Maria (Depozit)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "maria@firma.ro", "password": "Parola123!" }
+
+### 6. Maria vede lista, cu unitPrice null
+GET {{host}}/api/purchase-orders
+
+### 7. Maria încearcă să creeze o comandă: trebuie să dea 403
+POST {{host}}/api/purchase-orders
+Content-Type: application/json
+
+{
+  "supplierId": 1,
+  "expectedDeliveryDate": "2026-11-15",
+  "currency": "RON",
+  "lines": [ { "productId": 1, "quantity": 1, "unitPrice": 1 } ]
+}
