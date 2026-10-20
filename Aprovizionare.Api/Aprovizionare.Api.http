@@ -1,6 +1,22 @@
-@Aprovizionare.Api_HostAddress = http://localhost:5269
+@host = http://localhost:5269
 
-GET {{Aprovizionare.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Fără login: trebuie să dea 401
+GET {{host}}/api/auth/me
 
-###
+### Login cu parolă greșită: trebuie să dea 401
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "maria@firma.ro", "password": "gresit" }
+
+### Login corect
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "maria@firma.ro", "password": "Parola123!" }
+
+### Acum trebuie să dea emailul Mariei și rolul Warehouse
+GET {{host}}/api/auth/me
+
+### Logout
+POST {{host}}/api/auth/logout
