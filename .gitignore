@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Emailuri salvate local de FileEmailSender
+Aprovizionare.Api/emails/

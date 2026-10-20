@@ -203,3 +203,19 @@ Content-Type: application/json
 
 ### 23. Lista facturilor
 GET {{host}}/api/invoices
+
+
+######## ALERTE PE EMAIL ########
+# Jobul le trimite singur zilnic, la ora din Alerts:DailyAt. Admin le poate vedea și trimite imediat.
+
+### 24. Login ca Admin
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@firma.ro", "password": "Parola123!" }
+
+### 25. Ce emailuri ar pleca acum (nu trimite nimic)
+GET {{host}}/api/alerts/preview
+
+### 26. Trimite acum: emailurile apar ca fișiere .eml în Aprovizionare.Api/emails
+POST {{host}}/api/alerts/send-now

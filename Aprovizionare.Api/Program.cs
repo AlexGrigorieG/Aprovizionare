@@ -39,6 +39,17 @@ builder.Services.AddHttpClient<IExchangeRateProvider, BnrExchangeRateProvider>(c
     client.Timeout = TimeSpan.FromSeconds(20);
 });
 
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<AlertOptions>(builder.Configuration.GetSection("Alerts"));
+
+if (string.IsNullOrWhiteSpace(builder.Configuration["Email:SmtpHost"]))
+    builder.Services.AddSingleton<IEmailSender, FileEmailSender>();
+else
+    builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+
+builder.Services.AddScoped<AlertService>();
+builder.Services.AddHostedService<DailyAlertsJob>();
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context =>
@@ -58,7 +69,6 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
