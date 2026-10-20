@@ -31,6 +31,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddScoped<PurchaseOrderService>();
+builder.Services.AddScoped<GoodsReceiptService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

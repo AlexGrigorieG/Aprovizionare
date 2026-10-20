@@ -44,7 +44,7 @@ Content-Type: application/json
   ]
 }
 
-### 3. Comandă fără linii: trebuie să dea 400 cu mesajul de eroare
+### 3. Comandă fără linii
 POST {{host}}/api/purchase-orders
 Content-Type: application/json
 
@@ -62,7 +62,7 @@ Content-Type: application/json
 ### 6. Maria vede lista, cu unitPrice null
 GET {{host}}/api/purchase-orders
 
-### 7. Maria încearcă să creeze o comandă: trebuie să dea 403
+### 7. Maria încearcă să creeze o comandă
 POST {{host}}/api/purchase-orders
 Content-Type: application/json
 
@@ -72,3 +72,54 @@ Content-Type: application/json
   "currency": "RON",
   "lines": [ { "productId": 1, "quantity": 1, "unitPrice": 1 } ]
 }
+
+
+######## RECEPȚII ########
+# Folosește comanda creată la pasul 2 din secțiunea COMENZI.
+# Dacă are alt id decât 1, schimbă purchaseOrderId mai jos.
+
+### 8. Maria: prima tranșă, cu 60 de motocoase, 70 de lanțuri (20 peste comandă) și 10 perechi de mănuși necomandate
+POST {{host}}/api/goods-receipts
+Content-Type: application/json
+
+{
+  "supplierId": 2,
+  "purchaseOrderId": 1,
+  "receivedDate": "2026-10-20",
+  "notes": "Tranșa 1",
+  "lines": [
+    { "productId": 1, "quantity": 60 },
+    { "productId": 2, "quantity": 70 },
+    { "productId": 3, "quantity": 10 }
+  ]
+}
+
+### 9. Comanda trebuie să fie PartiallyReceived, cu 60/100 motocoase și 50/50 lanțuri
+GET {{host}}/api/purchase-orders/1
+
+### 10. Maria: a doua tranșă, cu restul de 40 de motocoase
+POST {{host}}/api/goods-receipts
+Content-Type: application/json
+
+{
+  "supplierId": 2,
+  "purchaseOrderId": 1,
+  "receivedDate": "2026-10-20",
+  "notes": "Tranșa 2",
+  "lines": [ { "productId": 1, "quantity": 40 } ]
+}
+
+### 11. Comanda trebuie să fie Received
+GET {{host}}/api/purchase-orders/1
+
+### 12. Recepție cu dată în viitor
+POST {{host}}/api/goods-receipts
+Content-Type: application/json
+
+{ "supplierId": 2, "receivedDate": "2030-01-01", "lines": [ { "productId": 1, "quantity": 1 } ] }
+
+### 13. Stocul: 100 de motocoase, 70 de lanțuri, 10 perechi de mănuși
+GET {{host}}/api/stock
+
+### 14. Lista recepțiilor
+GET {{host}}/api/goods-receipts
