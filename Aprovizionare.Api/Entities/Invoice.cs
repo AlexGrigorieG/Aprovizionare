@@ -13,6 +13,7 @@ public class Invoice
     public decimal ExchangeRate { get; set; }
     public InvoiceStatus Status { get; set; }
     public string? BlockReason { get; set; }
+    public string? DecisionNote { get; set; }
     public List<InvoiceLine> Lines  { get; set; } = [];
     public Supplier Supplier { get; set; } = null!;
     public PurchaseOrder PurchaseOrder { get; set; } = null!;

@@ -32,6 +32,12 @@ builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddScoped<PurchaseOrderService>();
 builder.Services.AddScoped<GoodsReceiptService>();
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddHttpClient<IExchangeRateProvider, BnrExchangeRateProvider>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Bnr:BaseUrl"] ?? "https://curs.bnr.ro/");
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

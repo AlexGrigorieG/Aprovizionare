@@ -123,3 +123,83 @@ GET {{host}}/api/stock
 
 ### 14. Lista recepțiilor
 GET {{host}}/api/goods-receipts
+
+
+######## FACTURI ########
+# Liniile facturii trimit la liniile comenzii 1: linia 1 = motocoase, linia 2 = lanțuri.
+# Dacă ai rulat secțiunea RECEPȚII complet, toate cele 100 de motocoase sunt recepționate.
+
+### 15. Login ca Elena (Contabilitate)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "elena@firma.ro", "password": "Parola123!" }
+
+### 16. Factură cu preț greșit la lanțuri (8,50 în loc de 8): trebuie să fie Blocked
+POST {{host}}/api/invoices
+Content-Type: application/json
+
+{
+  "number": "F-778",
+  "supplierId": 2,
+  "purchaseOrderId": 1,
+  "invoiceDate": "2026-10-16",
+  "currency": "EUR",
+  "lines": [
+    { "purchaseOrderLineId": 1, "quantity": 100, "unitPrice": 120 },
+    { "purchaseOrderLineId": 2, "quantity": 50, "unitPrice": 8.5 }
+  ]
+}
+
+### 17. Aprobare fără justificare: trebuie să dea 400
+POST {{host}}/api/invoices/1/approve
+Content-Type: application/json
+
+{}
+
+### 18. Respingere
+POST {{host}}/api/invoices/1/reject
+Content-Type: application/json
+
+{ "reason": "Furnizorul a trimis factura corectată F-779." }
+
+### 19. Factura corectă, datată duminică: Validated, cu cursul BNR de vineri
+POST {{host}}/api/invoices
+Content-Type: application/json
+
+{
+  "number": "F-779",
+  "supplierId": 2,
+  "purchaseOrderId": 1,
+  "invoiceDate": "2026-10-18",
+  "currency": "EUR",
+  "lines": [
+    { "purchaseOrderLineId": 1, "quantity": 100, "unitPrice": 120 },
+    { "purchaseOrderLineId": 2, "quantity": 50, "unitPrice": 8 }
+  ]
+}
+
+### 20. Aprobare la plată
+POST {{host}}/api/invoices/2/approve
+Content-Type: application/json
+
+{}
+
+### 21. Marcare ca plătită
+POST {{host}}/api/invoices/2/pay
+
+### 22. Încă o factură pentru 10 motocoase: Blocked, pentru că toate cele 100 sunt deja facturate
+POST {{host}}/api/invoices
+Content-Type: application/json
+
+{
+  "number": "F-780",
+  "supplierId": 2,
+  "purchaseOrderId": 1,
+  "invoiceDate": "2026-10-19",
+  "currency": "EUR",
+  "lines": [ { "purchaseOrderLineId": 1, "quantity": 10, "unitPrice": 120 } ]
+}
+
+### 23. Lista facturilor
+GET {{host}}/api/invoices

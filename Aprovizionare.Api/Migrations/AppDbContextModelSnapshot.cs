@@ -230,6 +230,9 @@ namespace Aprovizionare.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DecisionNote")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("ExchangeRate")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
