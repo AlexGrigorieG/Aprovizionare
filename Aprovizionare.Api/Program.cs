@@ -1,5 +1,6 @@
 using Aprovizionare.Api.Data;
 using Aprovizionare.Api.Entities;
+using Aprovizionare.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,20 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+           .AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>());
 });
+
 
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+builder.Services.AddScoped<AuditInterceptor>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
