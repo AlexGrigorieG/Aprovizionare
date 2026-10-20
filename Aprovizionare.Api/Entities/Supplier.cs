@@ -1,4 +1,5 @@
 namespace Aprovizionare.Api.Entities;
+
 public class Supplier
 {
     public int Id { get; set; }
