@@ -27,6 +27,7 @@ public record PurchaseOrderLineDto(
 public record PurchaseOrderDto(
     int Id,
     string Number,
+    int SupplierId,
     string SupplierName,
     DateOnly OrderDate,
     DateOnly ExpectedDeliveryDate,

@@ -79,7 +79,10 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(scope.ServiceProvider);
 }
 
-app.UseHttpsRedirection();
+// În dezvoltare, frontend-ul ajunge la API prin proxy-ul Vite pe HTTP; o redirecționare
+// spre HTTPS l-ar trimite pe alt port, iar browserul ar bloca cererea ca CORS.
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

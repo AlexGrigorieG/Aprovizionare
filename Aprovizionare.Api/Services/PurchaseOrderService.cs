@@ -81,6 +81,7 @@ public class PurchaseOrderService(AppDbContext db)
         return orders.Select(o => new PurchaseOrderDto(
             o.Id,
             o.Number,
+            o.SupplierId,
             o.Supplier.Name,
             o.OrderDate,
             o.ExpectedDeliveryDate,
